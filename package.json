@@ -2,16 +2,21 @@
   "name": "streaming-app",
   "version": "1.0.0",
   "description": "a backend for streaming app",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
   },
   "keywords": [
     "javascript",
     "express",
     "mongoodb"
-  
   ],
   "author": "Alok Mourya",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "nodemon": "^3.1.9",
+    "prettier": "^3.5.3"
+  }
 }
