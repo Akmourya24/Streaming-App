@@ -13,7 +13,7 @@ class ApiError extends Error {
         this.data = null; // Placeholder for additional data (if needed)
         this.message = message; // Error message
         this.success = false; // Indicates failure (always false for errors)
-        this.errors = errors; // Store additional error details (fix: previously assigned wrong value)
+        this.ors; errors = err// Store additional error details (fix: previously assigned wrong value)
 
         // If a custom stack trace is provided, use it; otherwise, generate one
         if (stack) {
