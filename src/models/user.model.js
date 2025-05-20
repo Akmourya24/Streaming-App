@@ -29,6 +29,11 @@ const userSchema = new mongoose.Schema(
 
         avater: {
             type: String,
+            required: true,
+
+        },
+        cover: {
+            type: String,
 
         },
 
