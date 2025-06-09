@@ -3,7 +3,7 @@ import ApiError from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import uploadONCloudinary from "../utils/Cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-
+import jwt from "jsonwebtoken";
 
 // Function to generate access and refresh tokens for a user
 // This function takes a userId, finds the user, generates tokens, saves the refresh token, and returns both tokens.
@@ -83,7 +83,7 @@ const userRegister = asyncHandler(async (req, res) => {
 // This function handles user login by validating input, checking for existing users, verifying passwords, generating access and refresh tokens, and returning the user data along with the tokens.
 const loginUser = asyncHandler(async (req, res) => {
     const { username, email, password } = req.body;
-   
+
     if (!email && !username) {
         throw new ApiError(400, "email or username is requied")
     }
@@ -151,8 +151,43 @@ const logoutUser = asyncHandler(async (req, res) => {
         json(new ApiResponse(200, {}, "user logged out"))
 })
 
+const refreshAccessToken = asyncHandler(async (req, res) => {
+    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
+
+    if (!incomingRefreshToken) {
+        throw new ApiError(401, "unauthorized requerst")
+    }
+    const decodedToken = jwt.verify(
+        incomingRefreshToken,
+        process.env.REFRESH_TOKEN_SECRET
+    )
+
+    const user = await User.findById(decodedToken._id)
+
+    if (!user || user.refreshToken !== incomingRefreshToken) {
+        throw new ApiError(401, "Invalid refresh token")
+    }
+    const option = {
+        httpOnly: true,
+        secure: true,
+    }
+
+    const { accessToken, newrefreshToken } = await generateAccessTokenandRefreshToken(user._id)
+
+    return res
+        .status(200)
+        .cookie("refreshToken", refreshToken, option)
+        .cookie("accessToken", accessToken, option)
+        .json(new ApiResponse(
+            200,
+            { accessToken, refreshToken, newrefreshToken },
+            "Access token refreshed successfully"
+        ))
+})
+
 export {
     userRegister,
     loginUser,
-    logoutUser
+    logoutUser,
+    refreshAccessToken
 };
