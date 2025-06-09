@@ -4,6 +4,7 @@ import { User } from "../models/user.model.js";
 import uploadONCloudinary from "../utils/Cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
+
 // Function to generate access and refresh tokens for a user
 // This function takes a userId, finds the user, generates tokens, saves the refresh token, and returns both tokens.
 const generateAccessTokenandRefreshToken = async (userId) => {
@@ -27,7 +28,7 @@ const generateAccessTokenandRefreshToken = async (userId) => {
 // This function handles user registration by validating input, checking for existing users, uploading avatar and cover images, and creating a new user in the database.
 const userRegister = asyncHandler(async (req, res) => {
     const { fullname, email, username, password } = req.body;
-    // console.log("req.body", req.body);
+    console.log("req.body", req.body);
     if (
         [username, fullname, email, password].some((field) =>
             (field?.trim() === "")
@@ -81,13 +82,14 @@ const userRegister = asyncHandler(async (req, res) => {
 });
 // This function handles user login by validating input, checking for existing users, verifying passwords, generating access and refresh tokens, and returning the user data along with the tokens.
 const loginUser = asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
-    if (!email || !password) {
-        throw new ApiError(400, "email or password is requied")
+    const { username, email, password } = req.body;
+   
+    if (!email && !username) {
+        throw new ApiError(400, "email or username is requied")
     }
 
     const userfind = await User.findOne({
-        $or: [{ email }, { password }]
+        $or: [{ email }, { username }]
     })
     if (!userfind) {
         throw new ApiError(404, "User does not exist");
@@ -110,6 +112,7 @@ const loginUser = asyncHandler(async (req, res) => {
     const userLoggedIn = await User.findById(userfind._id).select(
         "-password -refreshToken -__v -createdAt -updatedAt"  // Exclude sensitive fields not send user 
     );
+    console.log("user login successfully", userLoggedIn);
 
     return res
         .status(200).
@@ -140,6 +143,7 @@ const logoutUser = asyncHandler(async (req, res) => {
         httpOnly: true,
         secure: true,
     };
+    console.log("user logged out successfully");
     return res.
         status(200).
         cookie("refreshToken", option).
